@@ -1,17 +1,23 @@
 from typing import ClassVar
 
-from pydantic_settings import BaseSettings
-from sqlalchemy.ext.declarative import declarative_base
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.orm import DeclarativeBase
+
+
+class Base(DeclarativeBase):
+    pass
 
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
-    DB_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/python_api"
+    API_V1_STR: str = ""
+    DB_URL: str = ""
 
-    DBBaseModel: ClassVar = declarative_base()
+    DBBaseModel: ClassVar = Base
 
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        case_sensitive=True,
+    )
 
 
 settings = Settings()
