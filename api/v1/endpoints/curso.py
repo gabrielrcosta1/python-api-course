@@ -1,6 +1,6 @@
 from typing import List, Sequence
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,3 +25,15 @@ async def get_cursos(db: AsyncSession = Depends(get_session)):
     result = await db.execute(query)
     cursos: Sequence[CursoModel] = result.scalars().all()
     return cursos
+
+
+@curso_route.get("/{id}", response_model=CursoSchema)
+async def get_curso(id: int, db: AsyncSession = Depends(get_session)):
+    query = select(CursoModel).where(CursoModel.id == id)
+    result = await db.execute(query)
+    curso = result.scalar_one_or_none()
+    if curso is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="curso não encontrado"
+        )
+    return curso
